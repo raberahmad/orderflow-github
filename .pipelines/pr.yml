@@ -1,0 +1,59 @@
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  - group: oai-review
+
+stages:
+  - stage: BuildAndTest
+    displayName: 'Build & Test'
+    jobs:
+      - job: BuildAndTestJob
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Install .NET 10'
+            inputs:
+              packageType: 'sdk'
+              version: '10.0.x'
+              includePreviewVersions: true
+              performMultiLevelLookup: true
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Build'
+            inputs:
+              command: 'build'
+              arguments: '--configuration Release'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Test'
+            inputs:
+              command: 'test'
+              arguments: '--configuration Release --no-build'
+
+  - stage: PRReview
+    displayName: 'AI PR Review'
+    dependsOn: BuildAndTest
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - job: AIReviewJob
+        steps:
+          - task: PowerShell@2
+            displayName: 'Run AI PR Review'
+            env:
+              SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            inputs:
+              filePath: '.pipelines/Invoke-AIReview.ps1'
+              arguments: >
+                -OrganizationUrl "$(System.TeamFoundationCollectionUri)"
+                -Project "$(System.TeamProject)"
+                -RepositoryId "$(Build.Repository.Name)"
+                -PullRequestId "$(System.PullRequest.PullRequestId)"
+                -AoaiEndpoint "$(AOAI_ENDPOINT)"
+                -AoaiKey "$(AOAI_KEY)"
+                -AoaiDeployment "$(AOAI_DEPLOYMENT)"
+                -MaxTokens "$(AOAI_MAX_TOKENS)"
