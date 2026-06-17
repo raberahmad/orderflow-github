@@ -32,12 +32,7 @@ public class OrderService : IOrderService
     {
         var order = await _orderRepository.GetByIdAsync(id);
 
-        if (order is null)
-        {
-            return ServiceResult<OrderResponse>.NotFound($"Order {id} not found.");
-        }
-
-        return ServiceResult<OrderResponse>.Ok(MapToResponse(order));
+        return ServiceResult<OrderResponse>.Ok(MapToResponse(order!));
     }
 
     public async Task<ServiceResult<OrderResponse>> PlaceOrderAsync(PlaceOrderRequest request)
