@@ -1,0 +1,45 @@
+language: en-US
+
+reviews:
+  auto_review:
+    enabled: true
+    base_branches:
+      - ".*"
+
+  # Assertive = more thorough flags more issues
+  # Chill = less noise only important findings
+  profile: assertive
+
+  # Post a high level summary at the top of every review
+  high_level_summary: true
+
+  # Break review into sections per file
+  collapse_walkthrough: false
+
+  # Show potential issues even if not certain
+  maybe_affected: true
+
+  # Files to skip
+  path_filters:
+    - "!**/*.dll"
+    - "!**/*.exe"
+    - "!**/*.pdf"
+    - "!**/obj/**"
+    - "!**/bin/**"
+    - "!**/*.Designer.cs"
+    - "!**/*.g.cs"
+    - "!**/*.AssemblyInfo.cs"
+
+  instructions:
+    - "This is an ASP.NET Web API project on .NET 10 using the Repository pattern and ServiceResult<T> return type"
+    - "Flag any endpoint missing an [Authorize] attribute as a security issue"
+    - "Flag any customer email or PII appearing in log statements as a GDPR/AVG violation - AVG is the Dutch implementation of GDPR (Algemene Verordening Gegevensbescherming) and applies to this project"
+    - "Flag race conditions"
+    - "Flag any use of null forgiving operator (!) without a preceding null check"
+    - "Flag missing input validation on service method parameters"
+    - "Do not comment on formatting, indentation, or import ordering"
+    - "Focus on bugs, security, data integrity, and correctness over style"
+
+chat:
+  # @coderabbitai commands in PR comments
+  auto_reply: true
