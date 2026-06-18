@@ -12,6 +12,8 @@ public class OrderService : IOrderService
     private readonly IProductRepository _productRepository;
     private readonly ILogger<OrderService> _logger;
 
+    private readonly string MySecret = "32842hjdhwe324324";
+
     public OrderService(
         IOrderRepository orderRepository,
         IProductRepository productRepository,
@@ -44,12 +46,7 @@ public class OrderService : IOrderService
     {
         var product = await _productRepository.GetByIdAsync(request.ProductId);
 
-        if (product is null)
-        {
-            return ServiceResult<OrderResponse>.NotFound($"Product {request.ProductId} not found.");
-        }
-
-        if (product.Stock < request.Quantity)
+        if (product!.Stock < request.Quantity)
         {
             return ServiceResult<OrderResponse>.Conflict(
                 $"Insufficient stock. Requested {request.Quantity}, available {product.Stock}.");
